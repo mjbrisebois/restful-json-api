@@ -1,14 +1,14 @@
 {
-  "name": "restful-json-api",
+  "name": "@whi/restful-json-api",
   "version": "0.1.0",
-  "description": "",
+  "description": "A tool for rapid restful API development",
   "main": "src/index.js",
   "dependencies": {
+    "@whi/serious-error-types": "^0.1.0",
     "@whi/stdlog": "^0.3.0",
     "methods": "^1.1.2"
   },
   "devDependencies": {
-    "@whi/dbv": "^0.1.1",
     "chai": "^4.2.0",
     "express": "^4.17.1",
     "mocha": "^7.1.2",
@@ -19,6 +19,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Matthew Brisebois",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mjbrisebois/restful-json-api"
+  }
 }

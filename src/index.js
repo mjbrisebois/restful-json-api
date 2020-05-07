@@ -4,7 +4,10 @@ const log				= require('@whi/stdlog')(path.basename( __filename ), {
 });
 
 const assert				= require('assert');
-const methods				= require('methods');
+const http_methods			= require('methods');
+
+const { HTTPResponseError,
+	MethodNotAllowedError }		= require('@whi/serious-error-types');
 
 
 Object.defineProperty(Function.prototype, 'docstring', {
@@ -31,14 +34,18 @@ function separate_components ( config ) {
 }
 
 function register_method ( method_name ) {
-    assert( methods.includes( method_name.toLowerCase() ),
-	    `Unsupported HTTP method ${method_name}, supported methods are ${methods.join(', ')}` );
+    method_name				= method_name.toLowerCase();
+    assert( http_methods.includes( method_name ),
+	    `Unsupported HTTP method ${method_name}, supported methods are ${http_methods.join(', ')}` );
 
     return function ( app, handler ) {
 	assert( handler[Symbol.toStringTag] === "AsyncFunction",
 		      `Request handler must be an async function.  If it returns a Promise, set the function's 'Symbol.toStringTag' to "AsyncFunction"` );
 
 	const model			= this;
+
+	if ( model.methods === undefined )
+	    model.methods		= {};
 
 	log.debug("Defining app endpoint: %s %s", method_name, this.path );
 	app[ method_name ]( this.path, async function ( req, res, raise ) {
@@ -60,6 +67,7 @@ function register_method ( method_name ) {
 
 	    res.json( result );
 	});
+	model.methods[method_name]	= app[method_name];
     };
 }
 
@@ -130,6 +138,26 @@ class RestfulAPI {
 	for ( let [cmd, value] of Object.entries(this._directives) ) {
 	    await directives[ cmd ].call(this, app, value );
 	}
+
+	log.info("Defining 405 catch for path: %s", this.path );
+	app.all( this.path, (req, _, next) => {
+	    log.silly("Sending proper error response for: %s %s", req.method, req.path );
+
+	    // 404 if the request method was GET or HEAD
+	    if ( ["get", "head"].includes( req.method.toLowerCase() ) ) {
+		next( new HTTPResponseError( 404, `The requested resource cannot be found` ) );
+	    }
+	    // 405 if it does not recognize the method
+	    else if ( ["post", "put", "patch", "delete", "options"].includes( req.method.toLowerCase() ) ) {
+		log.debug("Unsupported method %s @ %s triggered by %s", req.method, this.path, req.path );
+		next( new MethodNotAllowedError( this.path, req.method, Object.keys( this.methods )) );
+	    }
+	    // 501 if it does not support the method
+	    else {
+		log.debug("Unrecognized method %s @ %s triggered by %s", req.method, this.path, req.path );
+		next( new HTTPResponseError( 501 ) );
+	    }
+	});
 
 	for ( let child of Object.values(this._children) ) {
 	    await child.initialization( app );
