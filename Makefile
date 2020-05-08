@@ -8,6 +8,14 @@ node_modules:		package-lock.json
 	npm install
 	touch $@
 build:			node_modules
+use-local-%:
+	npm uninstall @whi/$*
+	npm install ../$*
+use-npm-%:
+	npm uninstall @whi/$*
+	npm install @whi/$*
+use-local-serious-error-types:
+use-npm-serious-error-types:
 
 
 #

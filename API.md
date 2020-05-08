@@ -132,3 +132,28 @@ Example
 - **`__patch__.call( RestfulAPI, req, res )`** - `async function` for handling HTTP `PATCH` requests
 - **`__delete__.call( RestfulAPI, req, res )`** - `async function` for handling HTTP `DELETE` requests
 - **`__options__.call( RestfulAPI, req, res )`** - `async function` for handling HTTP `OPTIONS` requests
+
+## Directives vs Children
+Since directives and children reside in the same object, it is important that there be a
+deterministic way to tell them apart.
+
+- Directives start and end with 2 underscores `__` (eg. `__<directive name>__`).
+- Children are everything else.  Children keys map to URL path segments so they cannot contain any
+  path terminating characters (eg. `?`, `#`, or `/`).
+
+### Examples
+Example of the `description` directive
+```javascript
+{
+    __description__ = "This describes a resource"
+}
+```
+
+Example of the `get` directive
+```javascript
+{
+    async __get__ () {
+        return this.documentation( true );
+    }
+}
+```
