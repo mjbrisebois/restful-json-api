@@ -42,10 +42,10 @@ function register_method ( method_name ) {
 	assert( handler[Symbol.toStringTag] === "AsyncFunction",
 		      `Request handler must be an async function.  If it returns a Promise, set the function's 'Symbol.toStringTag' to "AsyncFunction"` );
 
-	const model			= this;
+	const restful			= this;
 
-	if ( model.methods === undefined )
-	    model.methods		= {};
+	if ( restful.methods === undefined )
+	    restful.methods		= {};
 
 	log.debug("Defining app endpoint: %s %s", method_name, this.path );
 	app[ method_name ]( this.path, async function ( req, res, raise ) {
@@ -54,7 +54,7 @@ function register_method ( method_name ) {
 		req.perform		= ( middleware ) => {
 		    return new Promise((f,r) => middleware.call(app, req, res, f));
 		};
-		result			= await handler.call( model, req, res );
+		result			= await handler.call( restful, req, res );
 	    } catch ( err ) {
 		return raise( err );
 	    }
@@ -67,7 +67,7 @@ function register_method ( method_name ) {
 
 	    res.json( result );
 	});
-	model.methods[method_name]	= app[method_name];
+	restful.methods[method_name]	= app[method_name];
     };
 }
 
@@ -186,13 +186,13 @@ class RestfulAPI {
 	const routes			= this.paths( recursive );
 
 	log.debug("Collecting documentation for %s routes", Object.keys(routes).length );
-	for ( let [path, model] of Object.entries(routes) ) {
+	for ( let [path, restful] of Object.entries(routes) ) {
 	    const info			= documentation[path] = {
-		"description": model._directives.description || null,
+		"description": restful._directives.description || null,
 		"methods": {},
 	    };
 
-	    Object.entries(model._directives)
+	    Object.entries(restful._directives)
 		.filter( ([_,v]) => typeof v === "function" )
 		.map( ([k,v]) => {
 		    let name		= k.toUpperCase();

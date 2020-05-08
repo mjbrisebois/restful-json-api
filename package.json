@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "A tool for rapid restful API development",
   "main": "src/index.js",
+  "files": [
+    "README.md",
+    "API.md"
+  ],
   "dependencies": {
     "@whi/serious-error-types": "^0.1.0",
     "@whi/stdlog": "^0.3.0",
