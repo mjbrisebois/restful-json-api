@@ -1,4 +1,4 @@
-![](https://img.shields.io/npm/v/@whi/restful-json-api/latest?style=flat-square)
+[![](https://img.shields.io/npm/v/@whi/restful-json-api/latest?style=flat-square)](http://npmjs.com/package/@whi/restful-json-api)
 
 # Restful JSON API
 A tool for rapid restful API development.

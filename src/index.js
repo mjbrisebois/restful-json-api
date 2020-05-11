@@ -1,6 +1,6 @@
 const path				= require('path');
 const log				= require('@whi/stdlog')(path.basename( __filename ), {
-    level: process.env.LOG_LEVEL || 'fatal',
+    level: ( process.env.LOG_LEVEL && !__dirname.includes("/node_modules/") ) || 'fatal',
 });
 
 const assert				= require('assert');
@@ -48,26 +48,25 @@ function register_method ( method_name ) {
 	    restful.methods		= {};
 
 	log.debug("Defining app endpoint: %s %s", method_name, this.path );
-	app[ method_name ]( this.path, async function ( req, res, raise ) {
+	async function endpoint ( req, res, raise ) {
 	    let result;
 	    try {
-		req.perform		= ( middleware ) => {
-		    return new Promise((f,r) => middleware.call(app, req, res, f));
-		};
-		result			= await handler.call( restful, req, res );
+		const draft		= restful.request( req, res, raise );
+		result			= await draft.execute( method_name, handler );
 	    } catch ( err ) {
 		return raise( err );
 	    }
 
 	    if ( result === undefined )
-		return res.jsonStatus(
-		    500, "Response Undefined",
+		return raise( new HTTPResponseError(
+		    500,  "Response Undefined",
 		    "The request finished without errors, but the response is undefined."
-		);
+		));
 
 	    res.json( result );
-	});
-	restful.methods[method_name]	= app[method_name];
+	};
+	this.methods[method_name]	= endpoint;
+	app[ method_name ]( this.path, endpoint );
     };
 }
 
@@ -75,7 +74,9 @@ const directives			= {
     "get": 		register_method( "get" ),
     "post": 		register_method( "post" ),
     "put": 		register_method( "put" ),
+    "patch": 		register_method( "patch" ),
     "delete": 		register_method( "delete" ),
+    "options": 		register_method( "options" ),
     "description":	() => null,
 };
 
@@ -201,6 +202,58 @@ class RestfulAPI {
 	}
 	return documentation;
     }
+
+    request ( req, res ) {
+	return new Request( req, res, this );
+    }
+}
+
+
+class Request {
+    fulfill;
+    reject;
+    delegation_history			= [];
+
+    constructor ( req, res, restful ) {
+	this.request			= req;
+	this.response			= res;
+	this.restful			= restful;
+    }
+
+    execute ( method, handler ) {
+	this.delegation_history.push( method );
+
+	return new Promise(async (f,r) => {
+	    this.fulfill		= f;
+	    this.reject			= r;
+
+	    try {
+		const result		= await handler.call(
+		    this, this.request, this.response
+		);
+
+		if ( this.delegation_history.length === 1 )
+		    f( result );
+	    } catch ( err ) {
+		r( err );
+	    }
+	});
+    }
+
+    async delegate ( method ) {
+	// check that the method is not the same as this one, otherwise it will be an infinite loop.
+	method				= method.toLowerCase();
+	if ( this.delegation_history.includes( method ) )
+	    return this.reject( new Error(`Delegation loop @ method '${method}', delegation history: ${this.delegation_history.join(" -> ")}`) );
+
+	this.delegation_history.push( method );
+	this.restful._directives[ method ].call( this, this.request, this.response )
+	    .then( this.fulfill, this.reject );
+    }
+
+    // perform ( middleware ) {
+    //     return new Promise((f,r) => middleware.call(app, req, res, f));
+    // };
 }
 
 
