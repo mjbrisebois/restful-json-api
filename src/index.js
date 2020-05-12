@@ -63,7 +63,10 @@ function register_method ( method_name ) {
 		    "The request finished without errors, but the response is undefined."
 		));
 
-	    res.json( result );
+	    if ( res.get("Content-type").includes("json") )
+		res.json( result );
+	    else
+		res.send( result );
 	};
 	this.methods[method_name]	= endpoint;
 	app[ method_name ]( this.path, endpoint );
@@ -218,6 +221,8 @@ class Request {
 	this.request			= req;
 	this.response			= res;
 	this.restful			= restful;
+
+	this.response.set("Content-type", "application/json");
     }
 
     execute ( method, handler ) {
