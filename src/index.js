@@ -1,12 +1,13 @@
 const path				= require('path');
 const log				= require('@whi/stdlog')(path.basename( __filename ), {
-    level: ( process.env.LOG_LEVEL && !__dirname.includes("/node_modules/") ) || 'fatal',
+    level: (!__dirname.includes("/node_modules/") && process.env.LOG_LEVEL ) || 'fatal',
 });
 
 const assert				= require('assert');
 const http_methods			= require('methods');
 
-const { HTTPResponseError,
+const { HTTPRequestError,
+	HTTPResponseError,
 	MethodNotAllowedError }		= require('@whi/serious-error-types');
 
 
@@ -149,7 +150,7 @@ class RestfulAPI {
 
 	    // 404 if the request method was GET or HEAD
 	    if ( ["get", "head"].includes( req.method.toLowerCase() ) ) {
-		next( new HTTPResponseError( 404, `The requested resource cannot be found` ) );
+		next( new HTTPRequestError( 404, `The requested resource cannot be found` ) );
 	    }
 	    // 405 if it does not recognize the method
 	    else if ( ["post", "put", "patch", "delete", "options"].includes( req.method.toLowerCase() ) ) {
@@ -180,7 +181,7 @@ class RestfulAPI {
 	    descendants[m.path]		= m;
 
 	    if ( recursive === true )
-		Object.assign( descendants, m.paths() );
+		Object.assign( descendants, m.paths( recursive ) );
 	}
 	return descendants;
     }

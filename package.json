@@ -8,7 +8,7 @@
     "API.md"
   ],
   "dependencies": {
-    "@whi/serious-error-types": "^0.1.2",
+    "@whi/serious-error-types": "^0.1.5",
     "@whi/stdlog": "^0.3.0",
     "methods": "^1.1.2"
   },
