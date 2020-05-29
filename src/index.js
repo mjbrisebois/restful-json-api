@@ -239,9 +239,9 @@ class Request {
 		);
 
 		if ( this.delegation_history.length === 1 )
-		    f( result );
+		    this.fulfill( result );
 	    } catch ( err ) {
-		r( err );
+		this.reject( err );
 	    }
 	});
     }
