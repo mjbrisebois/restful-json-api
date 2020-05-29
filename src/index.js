@@ -253,8 +253,9 @@ class Request {
 	    return this.reject( new Error(`Delegation loop @ method '${method}', delegation history: ${this.delegation_history.join(" -> ")}`) );
 
 	this.delegation_history.push( method );
+	log.info("Delegating request handling to %s", method );
 	this.restful._directives[ method ].call( this, this.request, this.response )
-	    .then( this.fulfill, this.reject );
+	    .then( this.fulfill.bind(this), this.reject.bind(this) );
     }
 
     // perform ( middleware ) {
