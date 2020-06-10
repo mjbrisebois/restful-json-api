@@ -3,9 +3,9 @@
 # Restful JSON API
 A tool for rapid restful API development.
 
-![](https://img.shields.io/github/issues-raw/mjbrisebois/restful-json-api?style=flat-square)
-![](https://img.shields.io/github/issues-closed-raw/mjbrisebois/restful-json-api?style=flat-square)
-![](https://img.shields.io/github/issues-pr-raw/mjbrisebois/restful-json-api?style=flat-square)
+[![](https://img.shields.io/github/issues-raw/mjbrisebois/restful-json-api?style=flat-square)](https://github.com/mjbrisebois/restful-json-api/issues)
+[![](https://img.shields.io/github/issues-closed-raw/mjbrisebois/restful-json-api?style=flat-square)](https://github.com/mjbrisebois/restful-json-api/issues?q=is%3Aissue+is%3Aclosed)
+[![](https://img.shields.io/github/issues-pr-raw/mjbrisebois/restful-json-api?style=flat-square)](https://github.com/mjbrisebois/restful-json-api/pulls)
 
 ## Overview
 

@@ -34,6 +34,8 @@ function separate_components ( config ) {
     return [ methods, children ];
 }
 
+const DO_NOTHING			= Symbol.for("@whi/restful-json-api;do-nothing");
+
 function register_method ( method_name ) {
     method_name				= method_name.toLowerCase();
     assert( http_methods.includes( method_name ),
@@ -56,6 +58,11 @@ function register_method ( method_name ) {
 		result			= await draft.execute( method_name, handler );
 	    } catch ( err ) {
 		return raise( err );
+	    }
+
+	    if ( result === DO_NOTHING ) {
+		log.silly("Received DO_NOTHING response for request: %s %s", req.method, req.path );
+		return;
 	    }
 
 	    if ( result === undefined )
@@ -266,4 +273,5 @@ class Request {
 
 module.exports				= {
     RestfulAPI,
+    DO_NOTHING,
 };
