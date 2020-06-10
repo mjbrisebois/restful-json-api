@@ -1,6 +1,6 @@
 {
   "name": "@whi/restful-json-api",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A tool for rapid restful API development",
   "main": "src/index.js",
   "files": [
