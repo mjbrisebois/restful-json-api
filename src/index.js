@@ -47,9 +47,6 @@ function register_method ( method_name ) {
 
 	const restful			= this;
 
-	if ( restful.methods === undefined )
-	    restful.methods		= {};
-
 	log.debug("Defining app endpoint: %s %s", method_name, this.path );
 	async function endpoint ( req, res, raise ) {
 	    let result;
@@ -94,6 +91,7 @@ const directives			= {
 class RestfulAPI {
 
     middleware_list			= [];
+    methods				= {};
 
     constructor ( config, path_segment = null, parent = null ) {
 	if ( path_segment !== null ) {
